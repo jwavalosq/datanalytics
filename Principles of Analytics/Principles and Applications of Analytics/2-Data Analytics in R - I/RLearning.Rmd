@@ -1,0 +1,164 @@
+---
+title: "Lab 01 R Learning"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 1: Variables, Hypothesis, Designs
+
+### *Title:* Offshore outsourcing: Its advantages, disadvantages, and effect on the American economy
+
+*Abstract*: The United States has trained some of the world's best computer programmers and technology experts. 
+Despite all of this training, many businesses do not have a full understanding of information technology. As the importance of technology in the business world grows, many companies are wasting money on extensive technology projects. When problems arise, they expect that further investment will solve these issues. To prevent such problems, many companies have begun to outsource these functions in an effort to reduce costs and improve performance. The majority of these outsourced information technology and call center jobs are going to low-wage countries, such as India and China where English-speaking college graduates are being hired at substantially lower wages. The purpose of this study is to evaluate the positive and negative aspects of offshore outsourcing with a focus on the outsourcing markets in India and China, arguably the two most popular destinations for outsourcers. The cost savings associated with offshore outsourcing will be evaluated in relation to the security risks and other weakness of offshore outsourcing. In addition, an analysis of the number of jobs sent overseas versus the number of jobs created in the United States will be used to assess the effects that outsourcing is having on the American economy and job market. Finally, the value of jobs lost from the American economy will be compared to the value of jobs created. The goal of these analyses is to create a clear picture of this increasingly popular business strategy.
+
+Answer the following questions about the abstract above:
+
+**1)	What is a potential hypothesis of the researchers?**
+
+_The potential hypothesis of the researchers would be to evaluate the positive and negative aspects of information technology offshore outsourcing in India and China._
+
+_The hypothesis would be to determine if there are cost savings associated with offshore outsourcing by comparing number of jobs created in the United States and the number of jobs sent overseas._
+
+**2)	What is one of the independent variables?**
+
+_An independent variable would be the country where the offshore outsourcing is being performe. The output of the variable will be either China or India._
+
+**a.What type of variable is the independent variable?**
+    
+  _The independent variable "Where" is a qualitative, and binary variable since it can take either one of two categories: China or India. In R, we can define it as a factor._
+
+**3)	What is one of the dependent variables?**
+
+_One of the dependent variables can be the cost of offshore outsourcing depending the country. Therefore, the variable "where" or "country" could be the independent variable to explain the cost of offshore outsourcing (dependent variable)_
+
+**a.	What type of variable is the dependent variable?**
+    
+  _The dependent variable "cost" is a quantitative, numerical and continuous variable. In R, we can define it as a numerical variable._
+    
+**4)	What might cause some measurement error in this experiment?**
+
+_There could be errors on the data gathering for the variable cost when asking the employees in China and India who participated in the sample about their salary. There might be a case when some employees did not report their real salary. _
+
+**5)	What type of research design is the experiment?**
+_The research could be correlational since it can determine the relation between two variables (how one variable affect the other one and/or viceversa). Also, It can be a cross-sectional research that analyzes two groups, offshore outsourcing in China and India. _
+
+**a.	Why?**
+  _Because it can analyze both offshore outsourcing scenarios in China and India and see the outcome in terms of cost to determine which market would be better for America's economy. Or, the separate impact of both in Americas' economy, either positive or negative._
+
+**6)	How might you measure the reliability of your dependent variable?**
+_Running the model over and over again to get it more accurate and trained._
+
+**7)	Is this study ecologically valid?**
+_Yes, it is._
+
+**8)	Can this study claim cause and effect?**
+
+**a.	Why/why not?**
+  _Yes it can. Because the effects on the American Economy caused by offshore outsourcing in China and India is considerable in terms of savings on costs of the IT and call center industry._
+
+**9)	What type of data collection did the researchers use (please note that #5 is a different question)?**
+_The type of data collection is observational_
+
+# Part 2: Use the assessment scores dataset (03_lab.csv) to answer these questions.
+
+The provided dataset includes the following information created to match the abstract:
+
+- Jobs: the percent of outsourced jobs for a call center.
+- Cost: one calculation of the cost savings for the business.
+- Cost2: a separate way to calculate cost savings for the business.
+- ID: an ID number for each business.
+- Where: where the jobs were outsourced to. 
+
+Calculate the following information:
+
+**1)	Create a frequency table of the percent of outsourced jobs.**
+
+```{r}
+dataset <- read.csv("03_data.csv", header = TRUE)
+outsourced_jobs <- table(dataset$jobs)
+hist(dataset$jobs)
+```
+
+**2)	Create histograms of the two types of cost savings. You will want to add the breaks argument to the hist() function. This argument adds more bars to the histogram, which makes it easier to answer the following questions:**
+
+`hist(dataset$column, breaks = 15)` 
+
+15 is a great number to pick, but it can be any number. For this assignment, try 15 to see a medium number of bars. 
+
+```{r}
+hist(dataset$cost, breaks = 15)
+abline(v=mean(dataset$cost), col="red")
+hist(dataset$cost2, breaks = 15)
+abline(v=mean(dataset$cost2), col="red")
+```
+
+**3)	Examine these histograms to answer the following questions:**
+
+**a.	Which cost savings appears the most normal?**
+  _The cost savings which distribution appears to follow a normal distribution is cost2. It seems the distribution follows a gaussian function (a bell shape) which is the common shape a normal distribution has._
+    
+**b.	Which cost savings data is multimodal?**
+  _The variable "cost" in de dataset is multimodal since it has two categories: cost1 and cost2._
+    
+**c.	Which cost savings data looks the most skewed (and in which direction positive or negative)? **
+  _It looks like cost1 is more skewed in negative direction, to the right side of the mean. We can see this on the tallest bar, we see it on the right side of the mean: clustered at the higher end._
+    
+**d.	Which cost savings data looks the most kurtotic?**
+  _cost2 looks more kurtotic, following a positive kurtosisis_  
+    
+**4)	Calculate the z-scores for each cost savings, so they are all on the same scale.**
+
+```{r}
+z_cost <- scale(dataset$cost) # z-score for variable cost
+z_cost2 <- scale(dataset$cost2) # z-score for variable cost2
+```
+
+**6)	How many of the cost saving scores were more extreme than 95% of the data (i.e., number of z-scores at a p < .05)?**
+
+```{r}
+p_value <- 0.05
+confidence_level <- 1-p_value
+z_value <- qnorm(1-(1-confidence_level)/2)
+extreme_zscores_cost <- sum(abs(z_cost) > z_value)
+extreme_zscores_cost2 <- sum(abs(z_cost2) > z_value)
+extreme_zscores_cost
+extreme_zscores_cost2
+``` 
+
+**a.	Cost Savings 1: **
+  _10_
+**c.	Cost Savings 2: **
+  _13_  
+**7)	Which business had:**
+
+**a.	the highest cost savings?**
+
+```{r}
+max(z_cost)
+max(z_cost2)
+```
+    
+**b.	the the lowest cost savings?**
+```{r}
+min(z_cost)
+min(z_cost2)
+```
+    
+**c.  Use both cost savings columns and find the ID number of the business with the lowest and highest z-score.**
+```{r}
+## cost
+costid_min <- dataset$id[z_cost == min(z_cost)]
+costid_max <- dataset$id[z_cost == max(z_cost)]
+## cost2
+costid2_min <- dataset$id[z_cost2 == min(z_cost2)]
+costid2_max <- dataset$id[z_cost2 == max(z_cost2)]
+cat("For the cost savings 1 (cost) the IDs with the lowest and higest z-score respectively: ", costid_min, costid_max, "\n")
+cat("For the cost savings 2 (cost2) the IDs with the lowest and higest z-score respectively: ", costid2_min, costid2_max)
+```

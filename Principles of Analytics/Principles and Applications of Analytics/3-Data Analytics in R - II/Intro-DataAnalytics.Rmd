@@ -1,0 +1,177 @@
+---
+title: "Introduction to Data Analytics 2"
+author: "Jesus Wladimir Avalos Quizhpi"
+date: "`r Sys.Date()`"
+output: 
+    html_document:
+      theme: journal
+      highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 1: Experiment Design
+
+### Title: Consumer Pseudo-Showrooming and Omni-Channel Product Placement Strategies
+
+*Abstract*: Recent advances in information technologies (IT) have powered the merger of online and offline retail channels into one single platform. Modern consumers frequently switch between online and offline channels when they navigate through various stages of the decision journey, motivating multichannel sellers to develop omni-channel strategies that optimize their overall profit. *This study examines consumers' cross-channel search behavior of "pseudo-showrooming"*, or *the consumer behavior of inspecting one product at a seller's physical store before buying a related but different product at the same seller’s online store*, and investigates how such consumer behavior allows a multichannel seller to achieve better coordination between its online and offline arms through optimal product placement strategies.
+
+Participants in the study were grouped into the following categories: 
+
+  - Where_bought: Where they ended up purchasing an item: bought at the store, bought online. 
+  - Who_bought: If they bought from the same or a different retailer. 
+
+Each participant was then measured on:
+
+  - Money: how much money they spent in dollars on the product.
+  - Time: how much time (in minutes) they spent looking at the product online. 
+
+**1)	What would be one possible null hypothesis based on this study?**
+
+_A null hypothesis would be to assess if the time spent looking at a product online does not have an impact in the decision to purchase an item at the store._
+
+**2)	What would be one possible alternative hypothesis based on this study?**
+
+_The time spent looking at a product online would increase the probability to buy a product at the store._
+
+**3)	Who are they sampling in this study?**
+
+_They're sampling consumers_
+
+**4)	Who is the intended population in this study?**
+
+_Modern consumers who do both online and in-store shopping._
+
+**5)	Give an example of type 1 error based on this study (do not just define, explain in context how it might have happened here).**
+
+_A type 1 error occurs when we reject the null hypothesis when it is actually true. In our particular study, a type error happens when we say we have statistical evidence to reject that the time spent at the online store has no impact in the decision to buy an item at the physical store. We then would accept alternative hypothesis and state that the time spent online does have a positive impact on the decision to buy in the store._
+
+**6)	Give an example of type 2 error based on this study (do not just define, explain in context how it might have happened here).**
+
+_The type 2 error would occur if the model fails to reject the null hypothesis when it is actually false. In the context of the study, Type 2 error would occur if we accept null hypothesis and state that there is no impact on the decision to buy an item in the physical store based on the time spent in the online store._
+
+## Part 2: Use the 04_data.csv to complete this portion.
+
+```{r import-data}
+dataset <- read.csv("04_data.csv", header = TRUE)
+head(dataset)
+tail(dataset)
+```
+
+**1)	For each IV list the levels (next to a, b):**
+
+    a.	Where bought: 
+```{r Where Bought}
+where_bought <- unique(dataset$where_bought)
+where_bought
+```
+
+    b.	Who bought:
+```{r Who Bought}
+who_bought <- unique(dataset$who_bought)
+who_bought
+```
+**2)	What are the conditions in this experiment?**
+
+_The conditions are:_
+  _- Purchasing an item from the same retailer at the store_
+  _- Purchasing an item from the same retailer online_
+  _- Purchasing an item from a different retailer at the store_
+  _- Purchasing an item from a different retailer online_
+
+**3)	For each condition list the means, standard deviations, and standard error for the conditions for time and money spent. Please note that means you should have several sets of M, SD, and SE. Be sure you name the sets of means, sd, and se different things so you can use them later.**
+```{r descriptives money}
+# VARIABLE "money"
+# Mean
+money_mean <- tapply(dataset$money, list(dataset$where_bought, dataset$who_bought), mean)
+# Standard deviation
+money_sd <- tapply(dataset$money, list(dataset$where_bought, dataset$who_bought), sd)
+# Length
+money_length <- tapply(dataset$money, list(dataset$where_bought, dataset$who_bought), length)
+# Standard error
+money_se <- money_sd/sqrt(money_length)
+
+money_mean
+money_sd
+money_se
+```
+```{r descriptives time}
+# VARIABLE "time"
+# Mean
+time_mean <- tapply(dataset$time, list(dataset$where_bought, dataset$who_bought), mean)
+# Standard deviation
+time_sd <- tapply(dataset$time, list(dataset$where_bought, dataset$who_bought), sd)
+# Length
+time_length <- tapply(dataset$time, list(dataset$where_bought, dataset$who_bought), length)
+# Standard error
+time_se <- time_sd/sqrt(time_length)
+
+time_mean
+time_sd
+time_se
+
+
+```
+
+**4)	Which condition appears to have the best model fit using the mean as the model (i.e. smallest error) for time?**
+
+_It appears that purchasing an item in the physical store from a different retailer (se: 0.3757)_
+
+**5)	What are the df for each condition?**
+```{r df}
+# Money
+money_df <- money_length-1
+money_df
+# Time
+time_df <- time_length-1
+time_df
+```
+
+**6)	What is the confidence interval (95%) for the means?**
+```{r conf-interval}
+##MONEY
+#Lower boundary
+money_low_bound_mean <- money_mean-1.96*money_sd
+cat("Lower boundary of confidence interval for money_mean: ", "\n")
+money_low_bound_mean
+
+money_upper_bound_mean <- money_mean+1.96*money_sd
+cat("Upper boundary of confidence interval for money_mean: ", "\n")
+money_upper_bound_mean
+
+#TIME
+#Lower boundary
+time_low_bound_mean <- time_mean-1.96*time_sd
+cat("Lower boundary of confidence interval for time_mean: ", "\n")
+time_low_bound_mean
+
+time_upper_bound_mean <- time_mean+1.96*time_sd
+cat("Upper boundary of confidence interval for time_mean: ", "\n")
+time_upper_bound_mean
+```
+**7)	Use the MOTE library to calculate the effect size for the difference between money spent for the following comparisons (that means you'll have to do this twice):**
+```{r MOTE}
+#install.packages("MOTE")
+library(MOTE)
+##Store versus online when bought at the same retailer
+money_effect_same_retailer <- d.ind.t(money_mean[2,2], money_mean[1,2], money_sd[2,2], money_sd[1,2], money_length[1], money_length[1], a = 0.05)
+money_effect_same_retailer$d
+##Store versus online when bought at a different retailer
+money_effect_diff_retailer <- d.ind.t(money_mean[2,1], money_mean[1,1], money_sd[2,1], money_sd[1,1], money_length[1], money_length[1], a = 0.05)
+money_effect_diff_retailer$d
+```
+**8)	What can you determine about the effect size in the experiment - is it small, medium or large?**
+
+_There is not much difference on the effect size in money spent in store versus online at same and different retailers. We see that for both scenarios: same and different retailers, the effect size is 3.24 and 3.18 respectively._
+
+**9)	How many people did we need in the study for each comparison?**
+```{r pwr}
+#install.packages("pwr")
+library(pwr)
+##Store versus online when bought at the same retailer
+pwr.t.test(n=NULL, d=money_effect_same_retailer$d, sig.level = 0.05, power = 0.8, type = "two.sample", alternative = "two.sided")
+##Store versus online when bought at a different retailer
+pwr.t.test(n=NULL, d=money_effect_diff_retailer$d, sig.level = 0.05, power = 0.8, type = "two.sample", alternative = "two.sided")
+```
