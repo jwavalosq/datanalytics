@@ -1,0 +1,245 @@
+---
+title: "Data Screening"
+author: "Jesus Avalos"
+date: "`r Sys.Date()`"
+output: 
+    html_document:
+      theme: journal
+      highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Dataset:
+
+600 employees participated in a company-wide experiment to test if an educational program would be effective at increasing employee satisfaction. Half of the employees were assigned to be in the control group, while the other half were assigned to be in the experimental group. The experimental group was the only group that received the educational intervention. All groups were given an employee satisfaction scale at time one to measure their initial levels of satisfaction. The same scale was then used half way through the program and at the end of the program. The goal of the experiment was to assess satisfaction to see if it increased across the measurements during the program as compared to a control group. 
+
+## Variables: 
+
+    a) Gender (1 = male, 2 = female)
+    b) Group (1 = control group, 2 = experimental group)
+    c) 3 satisfaction scores, ranging from 2-100 points. Decimals are possible! The control group was measured at the same three time points, but did not take part in the educational program. 
+        i) Before the program
+        ii)	Half way through the program 
+        iii) After the program 
+
+```{r starting}
+# Library rio
+#install.packages("rio")
+#install_formats()
+library(rio)
+
+# Load the dataset in csv format
+dataset <- read.csv("06_data.csv", header = TRUE)
+
+# First rows of the dataset
+head(dataset)
+
+# Structure of the dataset
+str(dataset)
+
+# Variables in the dataset
+names(dataset)
+
+```
+
+
+# Data screening:
+
+## Accuracy:
+
+    a)	Include output and indicate how the data are not accurate.
+    b)	Include output to show how you fixed the accuracy errors, and describe what you did.
+    
+```{r accuracy}
+data <- dataset #update the dataset with each step 
+
+# Categorical Variables
+# Categorizing Gender and Group variables
+data$Gender <- factor(data$Gender, 
+                         levels = c(1, 2), 
+                         labels = c("Male", "Female"))
+
+data$Group <- factor(data$Group,
+                        levels = c(1, 2),
+                        labels = c("Control Group", "Experimental Group"))
+
+apply(data[ , c("Gender", "Group")], 2, table)
+
+
+# Summary of the dataset
+summary(data)
+
+
+# Accuracy: Continuous variables
+# Make sure to set the range of the scores from 2 to 100 for begin, middle and after variables
+# Values of Begin, Middle and After should not be less than 2 and more than 100
+data[,3:5][data[,3:5] < 2 | data[,3:5] > 100] = NA
+summary(data)
+```
+_We notice a big amount of NA values (values which score is either less than 2 or more than 100) in the begin and after variable. 238 and 153 respectively, while other variables have only 8 NA valueS. We may need to find out a way to fix the errors with the NA values._
+
+
+## Missing data:
+
+    a)	Include output that shows you have missing data.
+    b)	Include output and a description that shows what you did with the missing data.
+        i)	Replace all participant data if they have less than or equal to 20% of missing data by row. 
+        ii)	You can leave out the other participants (i.e. you do not have to create allrows). 
+        
+```{r missing}
+head(data)
+
+summary(data)
+
+# Missing data per variables
+apply(data, 2, function(x) sum(is.na(x)))
+
+```
+_We notice too many missing values for variables Begin and After (238 and 153 respectively). We wouldn't be able to just remove all the missing values._
+
+```{r}
+# Proportion of missing data
+percentagetmiss = function(x){sum(is.na(x))/length(x)*100}
+
+# Percentage of missing data per column
+apply(data,2,percentagetmiss)
+
+# Percentage of missing data per row
+missing <- apply(data,1,percentagetmiss)
+missing
+
+# Distribution of missing data per row
+table(missing)
+```
+```{r}
+# Distribution of rows with missing data equal or less than 20%
+percentage_missing20 <- subset(data, missing <= 20)
+percentage_missing_rows20 <- apply(percentage_missing20,1,percentagetmiss)
+table(percentage_missing_rows20)
+
+# Distribution of rows with missing data more than 20%
+percentage_missing_over20 <- subset(data, missing > 20)
+percentage_missing_rows_over20 <- apply(percentage_missing_over20,1,percentagetmiss)
+table(percentage_missing_rows_over20)
+
+nrow(data)
+nrow(percentage_missing20)
+nrow(percentage_missing_over20)
+```
+
+
+```{r}
+# Create a dataset with the missing values we need to replace 
+replace_col = percentage_missing20[,-c(1,2)]
+noreplace_col = percentage_missing20[,c(1,2)]
+replace_col
+```
+
+```{r}
+# Install and load mice package
+#install.packages("mice")
+library(mice)
+temp_no_miss <- mice(replace_col)
+no_miss <- complete(temp_no_miss, 1)
+
+no_miss
+summary(no_miss)
+str(no_miss)
+```
+
+## Outliers:
+
+    a)	Include a summary of your mahal scores that are greater than the cutoff.
+    b)	What are the df for your Mahalanobis cutoff?
+    c)	What is the cut off score for your Mahalanobis measure?
+    d)	How many outliers did you have?
+    e)	Delete all outliers. 
+    
+```{r outliers}
+# Mahalanobis distance
+mahal <- mahalanobis(no_miss, 
+                     colMeans(no_miss, na.rm = TRUE), 
+                     cov(no_miss, use = "pairwise.complete.obs"))
+mahal
+```
+
+```{r}
+cutoff <- qchisq(1-0.001, ncol(no_miss))
+cutoff
+
+# Summary of the mahal scores that are greater than the cutoff
+summary(mahal < cutoff)
+
+subdata <- subset(no_miss, mahal < cutoff)
+subdata
+str(subdata)
+
+```
+
+# Assumptions:
+
+## Additivity: 
+
+    a)  Include the symnum bivariate correlation table of your continuous measures.
+    b)  Do you meet the assumption for additivity?
+    
+```{r additivity}
+# Install and load Corrplot
+#install.packages("corrplot")
+library(corrplot)
+
+cor(subdata)
+corrplot(cor(subdata))
+
+symnum(cor(subdata))
+```
+
+## Linearity: 
+
+    a)  Include a picture that shows how you might assess multivariate linearity.
+    b)  Do you think you've met the assumption for linearity?
+    
+```{r linearity}
+random <- rchisq(nrow(subdata), 7)
+subdata2 <- lm(random ~., data = subdata)
+summary(subdata2)
+
+stand <- rstudent(subdata2)
+qqnorm(stand)
+abline(0,1)
+```
+
+## Normality: 
+
+    a)  Include a picture that shows how you might assess multivariate normality.
+    b)  Do you think you've met the assumption for normality? 
+
+```{r normality}
+# install and load moments
+#install.packages("moments")
+library(moments)
+
+# skewness
+skewness(subdata, na.rm = TRUE)
+
+# kurtosis
+kurtosis(subdata, na.rm = TRUE)
+
+# Histogram
+hist(stand, breaks = 20)
+```
+
+## Homogeneity/Homoscedasticity: 
+
+    a)  Include a picture that shows how you might assess multivariate homogeneity.
+    b)  Do you think you've met the assumption for homogeneity?
+    c)  Do you think you've met the assumption for homoscedasticity?
+
+```{r homog-s}
+plot(scale(subdata2$fitted.values), stand)
+abline(0,0)
+abline(v=0)
+```
