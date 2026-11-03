@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Applied Data Analytics End to End: A Real Shop, From Messy Rows to Actions</title>
+<style>
+body{font-family:Georgia,serif;max-width:820px;margin:0 auto;padding:24px;line-height:1.65;color:#222}
+h1{line-height:1.25} h2{margin-top:2em} img{max-width:100%;height:auto;border:1px solid #ddd}
+.card{background:#f6f6f6;padding:16px;border-left:5px solid #2a7f62;margin:16px 0}
+.small{color:#555;font-size:.95em} a{color:#2a7f62}
+</style>
+</head>
+<body>
+<h1>Applied Data Analytics End to End</h1>
+<p><strong>A real shop, from messy rows to actions.</strong> This is a beginner friendly story about a UK online gift shop, told with real sales rows from December 2010 to December 2011. Every idea is explained before it is used. Every number carries its limit with it.</p>
+<p class="small">Source: UCI Machine Learning Repository, Online Retail II, dataset 502, by Daqing Chen (2012). This build uses the December 2010 to December 2011 slice, 541,909 rows. The full UCI file covers 2009 to 2011 and has 1,067,371 rows. See data/raw/PROVENANCE.md in the project folder. Local build only. Nothing here was published from this folder.</p>
+
+<h2>Chapter 1. First, clean the mess</h2>
+<p>Each row is one line on one receipt. Real data are messy. The largest mess here is rows with no customer: 135,080 raw rows have no CustomerID. Those rows are counted, not hidden, and they are left out of customer work, because customer work needs a customer.</p>
+<img src="charts/01_missing_values.png" alt="Missing values per column">
+<img src="charts/02_cleaning_funnel.png" alt="Rows surviving each cleaning step">
+<div class="card"><strong>Clean result:</strong> 397,884 rows, 4,338 customers, 18,532 invoices, revenue of 8,911,407.90 pounds.</div>
+
+<h2>Chapter 2. When does the shop sell?</h2>
+<p>Sales rise into autumn. November 2011 is the best complete month, at 1,161,817.38 pounds. February 2011 is the quietest complete month, at 447,137.35 pounds. Thursday is the strongest weekday, and midday is the busiest time. December 2011 looks low only because data stop on 9 December 2011. It is a partial month, not a collapse.</p>
+<img src="charts/03_monthly_revenue.png" alt="Monthly revenue">
+<img src="charts/04_monthly_orders.png" alt="Monthly orders">
+<img src="charts/05_weekday_revenue.png" alt="Revenue by weekday">
+<img src="charts/06_hour_revenue.png" alt="Revenue by hour of day">
+
+<h2>Chapter 3. Where does the money come from?</h2>
+<p>Mostly, from home. The United Kingdom accounts for 7,308,391.55 pounds, or 82.01 percent of clean revenue. The next markets are far smaller: Netherlands, 285,446.34 pounds, and EIRE, 265,545.90 pounds. The top product is PAPER CRAFT, LITTLE BIRDIE, at 168,469.60 pounds.</p>
+<img src="charts/07_country_revenue.png" alt="Top 10 countries by revenue">
+<img src="charts/08_uk_vs_rest.png" alt="United Kingdom versus all other countries">
+<img src="charts/09_top_products.png" alt="Top 10 products by revenue">
+<p class="small">Note: POSTAGE in the product list is a delivery charge, not a gift. It stays in the totals so totals match, and it is flagged in notebook 03.</p>
+
+<h2>Chapter 4. Who are the customers? Meet RFM.</h2>
+<p>RFM is three simple ideas. Recency: how many days since the last order. Frequency: how many orders. Monetary: how much spent in total. Each customer gets a score from 1 to 4 on each idea, and the scores make six segments.</p>
+<img src="charts/10_segment_customers.png" alt="Customers in each RFM segment">
+<img src="charts/11_segment_revenue.png" alt="Revenue in each RFM segment">
+<img src="charts/12_recency_histogram.png" alt="Recency histogram">
+<div class="card"><strong>The main lesson:</strong> Champions are 797 customers (18.4 percent) but 5,767,945.43 pounds (64.7 percent of revenue). Champions plus Loyal customers are 37.5 percent of customers and 82.6 percent of revenue. The median customer last ordered 51 days before the end, placed 2 orders, and spent 674.48 pounds.</div>
+
+<h2>Chapter 5. Can we forecast? Only with a warning label.</h2>
+<p>The forecast here is the average of the last three complete months. It is simple on purpose, so anyone can check it. Tested on September, October, and November 2011, it missed by 33.3, 29.5, and 24.3 percent, for an average miss of 29.0 percent. It missed low each time, because sales were rising. The next month forecast on that method is 1,051,324.85 pounds. Quote it only with the 29.0 percent miss.</p>
+<img src="charts/13_forecast_backtest.png" alt="Forecast backtest">
+
+<h2>Chapter 6. An original idea: the Recency Gap Ratio</h2>
+<p>A fixed 90 day cutoff treats a weekly buyer and a yearly buyer the same way. That is unfair. The Recency Gap Ratio compares a customer with themselves: days since last order divided by the median gap between their own past orders. Above 2 means they waited more than twice as long as usual. Among 2,760 customers with a usable ratio, 18.6 percent are above 2, and 12.2 percent are above 3. This is a warning signal to check in first, not a proven churn prediction, and not a reason to discount blindly.</p>
+<img src="charts/14_gap_ratio.png" alt="Recency Gap Ratio">
+<p>A simple two year customer value estimate (average order value times orders per year times 2) gives a median of 3,997.70 pounds for repeat customers. It assumes the past rate continues, and it ignores costs, so use it to rank care, not to book revenue.</p>
+<img src="charts/15_clv_by_segment.png" alt="Median CLV estimate by segment">
+
+<h2>Chapter 7. Who is new, and who comes back?</h2>
+<p>Most customers come back at least once: 65.58 percent ordered more than once, and 34.42 percent ordered only once. Turning a recent buyer into a second buyer is the cheapest growth in this data.</p>
+<img src="charts/16_new_customers_cohort.png" alt="New customers by first order month">
+<img src="charts/17_repeat_vs_onetime.png" alt="One time versus repeat customers">
+
+<h2>What to do, in money order</h2>
+<ol>
+<li>Protect Champions first, because they carry 64.7 percent of revenue.</li>
+<li>Check in with stretched repeat buyers (gap ratio above 2) before offering a discount.</li>
+<li>Help recent buyers place a second order.</li>
+<li>Test one non UK market properly, starting with Netherlands or EIRE.</li>
+<li>Staff and stock for Thursday, midday, and the autumn peak.</li>
+</ol>
+
+<h2>Honest cuts</h2>
+<ul>
+<li>No map. Country data are names, not coordinates, so bars are used instead.</li>
+<li>No market basket analysis and no churn classifier. Basket work is a next step, and there is no true future churn label in this file, so a classifier would be fake validation.</li>
+<li>No full December 2011 comparison, because that month is partial.</li>
+<li>No 2009 data. This build uses the 2010 to 2011 slice, and says so everywhere.</li>
+<li>Data end in December 2011, so nothing here describes shopping today.</li>
+</ul>
+
+<h2>Repo link and rebuild</h2>
+<p>Original repo (not published from here, local build only): <a href="https://github.com/jwavalosq/datanalytics">github.com/jwavalosq/datanalytics</a></p>
+<p>Rebuild: run <code>python scripts/download_data.py</code>, then <code>python scripts/build_processed.py</code>, then execute notebooks 01 to 06 in order. Full details are in README.md and BUILD_REPORT.md in the project folder.</p>
+<p class="small">Methods credit: RFM quartile scoring and the 3 month moving average are standard public methods, credited in the README. The Recency Gap Ratio is the original metric of this project.</p>
+</body>
+</html>

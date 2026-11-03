@@ -2,3 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+data/raw/online_retail.csv
