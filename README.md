@@ -72,7 +72,7 @@ That script rebuilds the processed tables and re-executes all six notebooks. It 
 
 ## The original repo, and what this folder builds on
 
-This folder is a fresh local build. It does not delete or overwrite any file from the original repo, github.com/jwavalosq/datanalytics. The original repo, as briefed, is a skeleton with no complete project. Its existing files, preserved in the original repo and not copied over here, are: a small model.py, a Streamlit stub streamlit_app.py, plot.png, ejemplo.R, a README stub, and empty course folders. This project matches the repo description, educational and practical resources for Applied Data Analytics, by turning that skeleton idea into one finished end to end example. Nothing here was published, pushed, posted, or signed into. This is a local build only.
+This folder is a fresh local build. It does not delete or overwrite any file from the original repo, github.com/jwavalosq/datanalytics. The original repo, as briefed, is a skeleton with no complete project. Its existing files, preserved in the original repo and not copied over here, are: a small model.py, a Streamlit stub streamlit_app.py, plot.png, ejemplo.R, a README stub, and empty course folders. This project matches the repo description, educational and practical resources for Applied Data Analytics, by turning that skeleton idea into one finished end to end example. This project was built locally and then published to this repo.
 
 ## Credits and methods, not just a clone
 
