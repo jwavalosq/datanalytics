@@ -14,7 +14,7 @@ h1{line-height:1.25} h2{margin-top:2em} img{max-width:100%;height:auto;border:1p
 <body>
 <h1>Applied Data Analytics End to End</h1>
 <p><strong>A real shop, from messy rows to actions.</strong> This is a beginner friendly story about a UK online gift shop, told with real sales rows from December 2010 to December 2011. Every idea is explained before it is used. Every number carries its limit with it.</p>
-<p class="small">Source: UCI Machine Learning Repository, Online Retail II, dataset 502, by Daqing Chen (2012). This build uses the December 2010 to December 2011 slice, 541,909 rows. The full UCI file covers 2009 to 2011 and has 1,067,371 rows. See data/raw/PROVENANCE.md in the project folder. Local build only. Nothing here was published from this folder.</p>
+<p class="small">Source: UCI Machine Learning Repository, Online Retail II, dataset 502, by Daqing Chen (2012). This build uses the December 2010 to December 2011 slice, 541,909 rows. The full UCI file covers 2009 to 2011 and has 1,067,371 rows. See data/raw/PROVENANCE.md in the project folder.</p>
 
 <h2>Chapter 1. First, clean the mess</h2>
 <p>Each row is one line on one receipt. Real data are messy. The largest mess here is rows with no customer: 135,080 raw rows have no CustomerID. Those rows are counted, not hidden, and they are left out of customer work, because customer work needs a customer.</p>
@@ -77,7 +77,7 @@ h1{line-height:1.25} h2{margin-top:2em} img{max-width:100%;height:auto;border:1p
 </ul>
 
 <h2>Repo link and rebuild</h2>
-<p>Original repo (not published from here, local build only): <a href="https://github.com/jwavalosq/datanalytics">github.com/jwavalosq/datanalytics</a></p>
+<p>Original repo: <a href="https://github.com/jwavalosq/datanalytics">github.com/jwavalosq/datanalytics</a></p>
 <p>Rebuild: run <code>python scripts/download_data.py</code>, then <code>python scripts/build_processed.py</code>, then execute notebooks 01 to 06 in order. Full details are in README.md and BUILD_REPORT.md in the project folder.</p>
 <p class="small">Methods credit: RFM quartile scoring and the 3 month moving average are standard public methods, credited in the README. The Recency Gap Ratio is the original metric of this project.</p>
 </body>
